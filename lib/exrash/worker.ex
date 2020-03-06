@@ -4,12 +4,10 @@ defmodule Exrash.Worker do
   alias Exrash.HttpClient
 
   def start_link(pid) do
-    IO.inspect pid
     GenServer.start_link(__MODULE__, [], name: {:global, pid})
   end
 
   def init(stack) do
-    HttpClient.start
     {:ok, stack}
   end
 
@@ -18,10 +16,22 @@ defmodule Exrash.Worker do
     {:reply, res, state}
   end
 
+  def handle_cast({:request_http, %{"http" => http}}, state) do
+    res = HttpClient.get! http
+    {:noreply, state}
+  end
+
   @doc """
   call to http request
   """
-  def request_http(request) do
-    GenServer.call(__MODULE__, {:request_http, request})
+  def request_http(pid, request) do
+    GenServer.call(pid, {:request_http, request})
+  end
+
+  @doc """
+  call to async http request
+  """
+  def async_request_http(pid, request) do
+    GenServer.cast(pid, {:request_http, request})
   end
 end
