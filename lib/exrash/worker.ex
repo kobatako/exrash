@@ -3,8 +3,9 @@ defmodule Exrash.Worker do
   use GenServer
   alias Exrash.HttpClient
 
-  def start_link(state) do
-    GenServer.start_link(__MODULE__, state, name: __MODULE__)
+  def start_link(pid) do
+    IO.inspect pid
+    GenServer.start_link(__MODULE__, [], name: {:global, pid})
   end
 
   def init(stack) do

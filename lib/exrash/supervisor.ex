@@ -6,22 +6,23 @@ defmodule Exrash.Supervisor do
   end
 
   def init(__init__) do
-    Supervisor.init(child_spec, strategy: :one_for_one)
+    {:ok, { {:one_for_one, 6, 60}, []} }
   end
 
-  defp child_spec() do
-    [
-      child_worker
-    ]
+  def start_worker() do
+    child_spec = child_worker(make_ref())
+    Supervisor.start_child(__MODULE__, child_spec)
   end
 
   @doc """
   child spec worker process
   """
-  defp child_worker() do
+  defp child_worker(pid) do
     %{
-      id: Exrash.Worker,
-      start: {Exrash.Worker, :start_link, [[:hello]]},
+      id: pid,
+      start: {Exrash.Worker, :start_link, [pid]},
+      restart: :temporary,
+      shutdown: :brutal_kill,
       type: :worker
     }
   end
