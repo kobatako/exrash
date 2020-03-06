@@ -29,7 +29,7 @@ defmodule Exrash.MasterSup do
   @doc """
   call to http request for worker sup
   """
-  def call_to_worker() do
-    Exrash.WorkerSup.call_http_request("http://192.168.33.142")
+  def call_to_worker(http) do
+    Exrash.WorkerSup.call_http_request(http)
   end
 end
