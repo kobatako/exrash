@@ -22,8 +22,11 @@ defmodule Exrash.MasterSup do
   @doc """
   create worker process
   """
+  def create_worker(count) when not is_integer(count), do: { :error, "not type count" }
+  def create_worker(count) when count <= 0, do: { :error, "don't create count" }
   def create_worker(count) do
-    for _ <- 1..count, do: Exrash.WorkerSup.start_worker()
+    res = for _ <- 1..count, do: Exrash.WorkerSup.start_worker()
+    { :ok, res }
   end
 
   @doc """
@@ -32,4 +35,13 @@ defmodule Exrash.MasterSup do
   def call_to_worker(http) do
     Exrash.WorkerSup.call_http_request(http)
   end
+
+  @doc """
+  fetch current worker process number
+  """
+  def fetch_worker_count(), do: Exrash.WorkerSup.fetch_worker_count
+
+  @doc """
+  """
+  def stop_call_request(), do: { :ok }
 end

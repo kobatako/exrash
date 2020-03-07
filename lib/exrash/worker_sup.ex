@@ -12,9 +12,10 @@ defmodule Exrash.WorkerSup do
     {:ok, { {:one_for_one, 6, 60}, []} }
   end
 
+  @doc """
+  """
   def start_worker() do
-    child_spec = child_worker(make_ref())
-    Supervisor.start_child(__MODULE__, child_spec)
+    Supervisor.start_child(__MODULE__, child_worker(make_ref()))
   end
 
   @doc """
@@ -43,5 +44,13 @@ defmodule Exrash.WorkerSup do
   """
   def call_worker_http_request({_, pid, :worker, _}, http) do
     Exrash.Worker.async_request_http(pid, %{"http" => http})
+  end
+
+  @doc """
+  fetch for worker count
+  """
+  def fetch_worker_count() do
+    Supervisor.count_children(__MODULE__)
+    |> (fn %{workers: count} -> count end).()
   end
 end
