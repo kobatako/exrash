@@ -17,7 +17,10 @@ defmodule Exrash.Worker do
   end
 
   def handle_cast({:request_http, %{"http" => http}}, state) do
+    from = Timex.now
     res = HttpClient.get! http
+    to = Timex.now
+    Exrash.ResultReport.add_report(res, from, to)
     {:noreply, state}
   end
 

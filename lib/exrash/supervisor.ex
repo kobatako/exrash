@@ -21,6 +21,13 @@ defmodule Exrash.Supervisor do
         shutdown: :brutal_kill,
         type: :worker
       },
+      %{
+        id: Exrash.ResultReport,
+        start: {Exrash.ResultReport, :start_link, []},
+        restart: :temporary,
+        shutdown: :brutal_kill,
+        type: :worker
+      }
     ]
     Supervisor.init(children, strategy: :one_for_one)
   end

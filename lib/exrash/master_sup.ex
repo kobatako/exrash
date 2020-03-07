@@ -14,6 +14,13 @@ defmodule Exrash.MasterSup do
         restart: :temporary,
         shutdown: :brutal_kill,
         type: :supervisor
+      },
+      %{
+        id: Exrash.MasterServer,
+        start: {Exrash.MasterServer, :start_link, []},
+        restart: :temporary,
+        shutdown: :brutal_kill,
+        type: :worker
       }
     ]
     Supervisor.init(children, strategy: :one_for_one)
@@ -44,4 +51,10 @@ defmodule Exrash.MasterSup do
   @doc """
   """
   def stop_call_request(), do: { :ok }
+
+  @doc """
+  """
+  def start_request(config) do
+    Exrash.MasterServer.start_request(config)
+  end
 end
