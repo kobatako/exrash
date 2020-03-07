@@ -1,5 +1,10 @@
 defmodule Exrash.Provider do
 
+  if Mix.env == :test do
+    @compile :export_all
+    @compile :nowarn_export_all
+  end
+
   use GenServer
 
   defstruct http: "", init_proc: 0, add_proc: 0, max_proc: nil, interval_count: 0, interval_time: nil
@@ -91,6 +96,9 @@ defmodule Exrash.Provider do
   """
   defp fetch_add_worker_num(_, add_proc, nil) when is_integer(add_proc), do: { :ok, add_proc }
   defp fetch_add_worker_num(current, add_proc, max_proc) when not is_integer(current) or not is_integer(add_proc) or not is_integer(max_proc) do
+    {:error, "is not type"}
+  end
+  defp fetch_add_worker_num(current, add_proc, max_proc) when current <= 0 or add_proc <= 0 or max_proc <= 0 do
     {:error, "is not type"}
   end
   defp fetch_add_worker_num(current, _, max_proc) when max_proc <= current, do: { :ok, 0 }
