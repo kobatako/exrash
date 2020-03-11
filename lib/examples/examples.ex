@@ -1,4 +1,6 @@
-defmodule Exrash.Example do
+defmodule Exrash.Examples do
+
+  alias __MODULE__
 
   alias Exrash.Master.MasterConfig
   alias Exrash.Worker.WorkerConfig
@@ -46,5 +48,15 @@ defmodule Exrash.Example do
       }
     )
     Exrash.Provider.start_worker_process()
+  end
+
+  def before_call_func({ method, url, header }) do
+    IO.inspect "before call func"
+    {method, url, header}
+  end
+
+  def after_call_func({ res, from, to }) do
+    IO.inspect "after call func"
+    {res, from, to}
   end
 end

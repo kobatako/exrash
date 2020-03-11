@@ -36,6 +36,13 @@ defmodule Exrash.MasterServer do
 
   @doc """
   """
+  def handle_cast({:call_request}, %{config: %{http: http}}=state) do
+    call_to_worker(http)
+    {:noreply, state}
+  end
+
+  @doc """
+  """
   def handle_cast({:start_worker_process, master_config, worker_config}, state) do
     with { :ok, workers } <- create_worker(master_config.init_proc)
     do
@@ -54,9 +61,7 @@ defmodule Exrash.MasterServer do
 
   @doc """
   """
-  def set_provider_config(config) do
-    GenServer.call(__MODULE__, { :set_provider, config })
-  end
+  def set_provider_config(config), do: GenServer.call(__MODULE__, { :set_provider, config })
 
   @doc """
   """
@@ -74,13 +79,6 @@ defmodule Exrash.MasterServer do
   """
   def start_worker_process(master_config, worker_config) do
     GenServer.cast(__MODULE__, { :start_worker_process, master_config, worker_config })
-  end
-
-  @doc """
-  """
-  def handle_cast({:call_request}, %{config: %{http: http}}=state) do
-    call_to_worker(http)
-    {:noreply, state}
   end
 
   @doc """
@@ -162,9 +160,7 @@ defmodule Exrash.MasterServer do
   @doc """
   call to http request for worker sup
   """
-  def call_to_worker(http) do
-    Exrash.WorkerSup.call_http_request(http)
-  end
+  def call_to_worker(http), do: Exrash.WorkerSup.call_http_request(http)
 
   @doc """
   fetch current worker process number
@@ -180,6 +176,8 @@ defmodule Exrash.MasterServer do
   """
   def stop_call_request(), do: { :ok }
 
+  @doc """
+  """
   def start_workers({:ok, workers}, config) do
     workers
     |> Enum.map(&(Exrash.WorkerSup.start_worker(&1, config)))
