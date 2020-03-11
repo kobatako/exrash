@@ -1,7 +1,8 @@
 defmodule Exrash.Example do
 
-  alias Exrash.MasterConfig
-  alias Exrash.WorkerConfig
+  alias Exrash.Master.MasterConfig
+  alias Exrash.Worker.WorkerConfig
+  alias Exrash.Worker.WorkerScenario
 
   def sample_call() do
     Exrash.start
@@ -22,7 +23,21 @@ defmodule Exrash.Example do
       %Exrash.Provider{
         worker_config: %WorkerConfig{
           http: "http://192.168.33.142",
-          count: 5, sleep: 0
+          count: 5, sleep: 0,
+          scenarios: [
+            %WorkerScenario{
+              url: "http://192.168.33.142/index.html",
+              method: :get
+            },
+            %WorkerScenario{
+              url: "http://192.168.33.142/hello.html",
+              method: :get
+            },
+            %WorkerScenario{
+              url: URI.parse("http://192.168.33.142/sample.html"),
+              method: :get
+            }
+          ]
         },
         master_config: %MasterConfig{
           http: "http://192.168.33.142",
