@@ -30,7 +30,7 @@ defmodule Exrash.MasterSup do
     Exrash.MasterServer.start_http_request(config)
   end
 
-  def start_worker_process(config) do
-    Exrash.MasterServer.start_worker_process(config)
+  def start_worker_process(master_config, worker_config) do
+    Exrash.MasterServer.start_worker_process(master_config, worker_config)
   end
 end

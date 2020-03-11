@@ -6,8 +6,10 @@ defmodule Exrash.Provider do
   end
 
   use GenServer
+  alias Exrash.WorkerConfig
+  alias Exrash.MasterConfig
 
-  defstruct http: "", init_proc: 0, add_proc: 0, max_proc: nil, interval_count: 0, interval_time: nil, count: 0, sleep: 0
+  defstruct master_config: %MasterConfig{}, worker_config: %WorkerConfig{}
 
   def start_link() do
     GenServer.start_link(__MODULE__, [], name: __MODULE__)
@@ -32,8 +34,8 @@ defmodule Exrash.Provider do
 
   @doc """
   """
-  def handle_cast({:start_http_request}, %{config: %{http: http}=config}=state) do
-    Exrash.MasterSup.start_http_request(config)
+  def handle_cast({:start_http_request}, %{config: config}=state) do
+    Exrash.MasterSup.start_http_request(config.master_config)
     {:noreply, state}
   end
 
@@ -46,7 +48,7 @@ defmodule Exrash.Provider do
   @doc """
   """
   def handle_cast({:start_worker_process}, %{config: config}=state) do
-    Exrash.MasterSup.start_worker_process(config)
+    Exrash.MasterSup.start_worker_process(config.master_config, config.worker_config)
     {:noreply, state}
   end
 

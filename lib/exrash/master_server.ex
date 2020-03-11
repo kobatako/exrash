@@ -7,7 +7,7 @@ defmodule Exrash.MasterServer do
   end
 
   def init(__init__) do
-    { :ok, %{ config: nil } }
+    { :ok, %{ master_config: nil, worker_config: nil } }
   end
 
   @doc """
@@ -36,16 +36,16 @@ defmodule Exrash.MasterServer do
 
   @doc """
   """
-  def handle_cast({:start_worker_process, config}, state) do
-    with { :ok, workers } <- create_worker(config.init_proc)
+  def handle_cast({:start_worker_process, master_config, worker_config}, state) do
+    with { :ok, workers } <- create_worker(master_config.init_proc)
     do
-      workers |> start_workers(config)
+      workers |> start_workers(worker_config)
       spawn(__MODULE__, :interval, [
-        config.interval_time, config.interval_count,
+        master_config.interval_time, master_config.interval_count,
         fn args -> args |> call_to_start_worker end,
-        { config.add_proc, config.max_proc, config }
+        { master_config.add_proc, master_config.max_proc, worker_config }
       ])
-      { :noreply, { :ok, :start_http_request }, %{ state| config: config } }
+      { :noreply, { :ok, :start_http_request }, %{ state| master_config: master_config, worker_config: worker_config } }
     else
       _ ->
         { :noreply, { :error, :start_http_request }, state }
@@ -72,8 +72,8 @@ defmodule Exrash.MasterServer do
 
   @doc """
   """
-  def start_worker_process(config) do
-    GenServer.cast(__MODULE__, { :start_worker_process, config })
+  def start_worker_process(master_config, worker_config) do
+    GenServer.cast(__MODULE__, { :start_worker_process, master_config, worker_config })
   end
 
   @doc """
@@ -87,10 +87,10 @@ defmodule Exrash.MasterServer do
   call request to worker
   """
   def call_to_start_worker({ add_proc, max_proc, config }) do
-    with { :ok, num } <- fetch_worker_count |> fetch_add_worker_num(add_proc, max_proc)
+    with { :ok, num } <- fetch_worker_count |> fetch_add_worker_num(add_proc, max_proc),
+       {:ok, workers }  <- create_worker(num)
     do
-      create_worker(num)
-      |> start_workers(config)
+      start_workers(workers, config)
       { :ok }
     else
       { :error, res } ->
@@ -153,7 +153,7 @@ defmodule Exrash.MasterServer do
   create worker process
   """
   def create_worker(count) when not is_integer(count), do: { :error, "not type count" }
-  def create_worker(count) when count <= 0, do: { :error, "don't create count" }
+  def create_worker(count) when count < 0, do: { :error, "don't create count" }
   def create_worker(count) do
     res = for _ <- 1..count, do: Exrash.WorkerSup.create_worker
     { :ok, res }

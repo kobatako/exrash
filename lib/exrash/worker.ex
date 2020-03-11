@@ -41,9 +41,6 @@ defmodule Exrash.Worker do
   def handle_cast({ :running }, %{ config: nil }=state), do: {:noreply, state}
   def handle_cast({ :running }, %{ config: %{ count: 0 } }=state), do: {:noreply, state}
   def handle_cast({ :running }, %{ config: config }=state) do
-    IO.inspect "[Exrash][Worker] handle_cast : running"
-    IO.inspect config
-    IO.inspect config.http
     call_request(config.http)
     |> Exrash.ResultReport.add_report
 
@@ -55,8 +52,6 @@ defmodule Exrash.Worker do
   @doc """
   """
   def call_request(http) do
-    IO.inspect "[Exrash][Worker] call_request"
-    IO.inspect http
     from = Timex.now
     res = HttpClient.get! http
     to = Timex.now
