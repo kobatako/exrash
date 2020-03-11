@@ -14,7 +14,7 @@ defmodule Exrash.WorkerSup do
 
   @doc """
   """
-  def start_worker() do
+  def create_worker() do
     Supervisor.start_child(__MODULE__, child_worker(make_ref()))
   end
 
@@ -52,5 +52,25 @@ defmodule Exrash.WorkerSup do
   def fetch_worker_count() do
     Supervisor.count_children(__MODULE__)
     |> (fn %{workers: count} -> count end).()
+  end
+
+  def running_worker({:ok, pid}), do: Exrash.Worker.running_worker(pid)
+  def running_worker({_, id, :worker, _}), do: Exrash.Worker.running_worker(id)
+
+  @doc """
+  """
+  def set_config(config) do
+    Supervisor.which_children(__MODULE__)
+    |> Enum.map(fn worker -> set_config(worker, config) end)
+  end
+
+  def set_config({_, pid, :worker, _}, config),do: Exrash.Worker.set_config(pid, config)
+  def set_config({:ok, pid}, config), do: Exrash.Worker.set_config(pid, config)
+
+  @doc """
+  """
+  def start_worker(worker, config) do
+    set_config(worker, config)
+    running_worker(worker)
   end
 end

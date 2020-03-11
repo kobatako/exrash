@@ -30,6 +30,7 @@ defmodule Exrash.ResultReport do
 
   @doc """
   """
+  def add_report({res, from, to}), do: GenServer.cast(Exrash.ResultReport, {:add_report, { res, from, to }})
   def add_report(res, from, to), do: GenServer.cast(Exrash.ResultReport, {:add_report, { res, from, to }})
 
   @doc """

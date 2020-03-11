@@ -26,35 +26,11 @@ defmodule Exrash.MasterSup do
     Supervisor.init(children, strategy: :one_for_one)
   end
 
-  @doc """
-  create worker process
-  """
-  def create_worker(count) when not is_integer(count), do: { :error, "not type count" }
-  def create_worker(count) when count <= 0, do: { :error, "don't create count" }
-  def create_worker(count) do
-    res = for _ <- 1..count, do: Exrash.WorkerSup.start_worker()
-    { :ok, res }
+  def start_http_request(config) do
+    Exrash.MasterServer.start_http_request(config)
   end
 
-  @doc """
-  call to http request for worker sup
-  """
-  def call_to_worker(http) do
-    Exrash.WorkerSup.call_http_request(http)
-  end
-
-  @doc """
-  fetch current worker process number
-  """
-  def fetch_worker_count(), do: Exrash.WorkerSup.fetch_worker_count
-
-  @doc """
-  """
-  def stop_call_request(), do: { :ok }
-
-  @doc """
-  """
-  def start_request(config) do
-    Exrash.MasterServer.start_request(config)
+  def start_worker_process(config) do
+    Exrash.MasterServer.start_worker_process(config)
   end
 end
