@@ -42,9 +42,7 @@ defmodule Exrash.WorkerSup do
   @doc """
   call http request for worker process
   """
-  def call_worker_http_request({_, pid, :worker, _}, http) do
-    Exrash.Worker.async_request_http(pid, %{"http" => http})
-  end
+  def call_worker_http_request({_, pid, :worker, _}, http), do: Exrash.Worker.async_request_http(pid, %{"http" => http})
 
   @doc """
   fetch for worker count
@@ -59,18 +57,22 @@ defmodule Exrash.WorkerSup do
 
   @doc """
   """
-  def set_config(config) do
+  def set_worker_config(config) do
     Supervisor.which_children(__MODULE__)
-    |> Enum.map(fn worker -> set_config(worker, config) end)
+    |> Enum.map(fn worker -> set_worker_config(worker, config) end)
   end
-
-  def set_config({_, pid, :worker, _}, config),do: Exrash.Worker.set_config(pid, config)
-  def set_config({:ok, pid}, config), do: Exrash.Worker.set_config(pid, config)
 
   @doc """
   """
+  def set_worker_config({_, pid, :worker, _}, config),do: Exrash.Worker.set_config(pid, config)
+  def set_worker_config({:ok, pid}, config), do: Exrash.Worker.set_config(pid, config)
+
+  @doc """
+  start worker process
+  set worker config and start worker process
+  """
   def start_worker(worker, config) do
-    set_config(worker, config)
+    set_worker_config(worker, config)
     running_worker(worker)
   end
 end
