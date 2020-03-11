@@ -29,7 +29,7 @@ defmodule Exrash.Worker do
   call http request
   """
   def handle_cast({:request_http, %{"http" => http}}, state) do
-    { res, from, to } = call_request(http)
+    { res, from, to } = call_request(:get, http, [])
     Exrash.ResultReport.add_report(res, from, to)
     {:noreply, state}
   end
@@ -41,8 +41,7 @@ defmodule Exrash.Worker do
   def handle_cast({ :running }, %{ config: nil }=state), do: {:noreply, state}
   def handle_cast({ :running }, %{ config: %{ count: 0 } }=state), do: {:noreply, state}
   def handle_cast({ :running }, %{ config: config }=state) do
-    call_request(config.http)
-    |> Exrash.ResultReport.add_report
+    running_scenario(config.scenarios)
 
     Process.sleep(config.sleep * 1000)
     Exrash.Worker.running_worker(self)
@@ -50,13 +49,26 @@ defmodule Exrash.Worker do
   end
 
   @doc """
+  running for scenario request
   """
-  def call_request(http) do
+  def running_scenario([]), do: { :ok }
+  def running_scenario([scenario| tail]) do
+    call_request(scenario.method, scenario.url, scenario.header)
+    |> Exrash.ResultReport.add_report
+    running_scenario(tail)
+  end
+
+  @doc """
+  """
+  def call_request(:get, %URI{}=url, header), do: call_request(:get, to_string(url), header)
+  def call_request(method, http, nil), do: call_request(method, http, [])
+  def call_request(:get, http, header) do
     from = Timex.now
-    res = HttpClient.get! http
+    res = HttpClient.get!(http, header)
     to = Timex.now
     {res, from, to}
   end
+  def call_request(_, _, _), do: {nil, nil, nil}
 
   @doc """
   call to http request

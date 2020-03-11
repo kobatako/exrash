@@ -6,8 +6,8 @@ defmodule Exrash.Provider do
   end
 
   use GenServer
-  alias Exrash.WorkerConfig
-  alias Exrash.MasterConfig
+  alias Exrash.Worker.WorkerConfig
+  alias Exrash.Master.MasterConfig
 
   defstruct master_config: %MasterConfig{}, worker_config: %WorkerConfig{}
 
