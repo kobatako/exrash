@@ -52,6 +52,10 @@ defmodule Exrash.Provider do
     {:noreply, state}
   end
 
+  def terminate(reason) do
+    { :shutdown, "terminate provider" }
+  end
+
   @doc """
   start request
   """

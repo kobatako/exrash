@@ -59,6 +59,10 @@ defmodule Exrash.MasterServer do
     end
   end
 
+  def terminate(reason, _state) do
+    {:shutdown, "terminate master server"}
+  end
+
   @doc """
   """
   def set_provider_config(config), do: GenServer.call(__MODULE__, { :set_provider, config })
