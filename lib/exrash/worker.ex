@@ -50,6 +50,10 @@ defmodule Exrash.Worker do
     { :noreply, %{ state| config: %{ config| count: config.count - 1 }}}
   end
 
+  def terminate(reson, state) do
+    { :shutdown, "terminate worker process" }
+  end
+
   @doc """
   running for scenarios request
   """
