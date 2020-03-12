@@ -5,18 +5,19 @@ defmodule Exrash.ResultReport do
 
   use GenServer
 
-  defstruct report: []
+  defstruct report: [], exporter: nil
 
-  def start_link() do
-    GenServer.start_link(__MODULE__, [], name: __MODULE__)
+  def start_link(exporter \\ nil) do
+    GenServer.start_link(__MODULE__, { exporter }, name: __MODULE__)
   end
 
-  def init(__init__) do
-    {:ok, %Exrash.ResultReport{}}
+  def init({ exporter }) do
+    {:ok, %Exrash.ResultReport{ exporter: exporter }}
   end
 
   def handle_cast({:add_report, { result, from, to }}, state) do
     res = Exrash.ReportLog.new(result, from, to)
+    export_reportlog(state.exporter, res)
     {:noreply, %Exrash.ResultReport{state | report: [res| state.report]}}
   end
 
@@ -27,6 +28,9 @@ defmodule Exrash.ResultReport do
   def handle_call({:get_logs, fetch_state}, _from, state) do
     {:reply, filter(fetch_state, state.report) |> sort_log, state}
   end
+
+  def export_reportlog(nil, res), do: { :ok }
+  def export_reportlog(exporter, res), do: GenServer.cast(exporter, { :export_log, res})
 
   @doc """
   """
