@@ -1,5 +1,10 @@
 defmodule Exrash.MasterServer do
 
+  if Mix.env == :test do
+    @compile :export_all
+    @compile :nowarn_export_all
+  end
+
   use GenServer
 
   def start_link() do

@@ -2,15 +2,11 @@ defmodule Exrash.Examples do
 
   alias __MODULE__
 
-  alias Exrash.Master.MasterConfig
-  alias Exrash.Worker.WorkerConfig
-  alias Exrash.Worker.WorkerScenario
-
   def sample_call() do
     Exrash.start
-    Exrash.Provider.set_provider_config(
-      %Exrash.Provider{
-        master_config: %MasterConfig{
+    Exrash.Interface.set_configure(
+      %{
+        master_config: %{
           http: "http://192.168.33.142",
           init_proc: 5, interval_time: 2, interval_count: 5, add_proc: 0
         }
@@ -21,33 +17,33 @@ defmodule Exrash.Examples do
 
   def sample_worker_process() do
     Exrash.start
-    Exrash.Provider.set_provider_config(
-      %Exrash.Provider{
-        worker_config: %WorkerConfig{
+    Exrash.Interface.set_configure(
+      %{
+        worker_config: %{
           http: "http://192.168.33.142",
           count: 5, sleep: 0,
           scenarios: [
-            %WorkerScenario{
+            %{
               url: "http://192.168.33.142/index.html",
               method: :get
             },
-            %WorkerScenario{
+            %{
               url: "http://192.168.33.142/hello.html",
               method: :get
             },
-            %WorkerScenario{
+            %{
               url: URI.parse("http://192.168.33.142/sample.html"),
               method: :get
             }
           ]
         },
-        master_config: %MasterConfig{
+        master_config: %{
           http: "http://192.168.33.142",
           init_proc: 5, interval_time: 2, interval_count: 5, add_proc: 0
         }
       }
     )
-    Exrash.Provider.start_worker_process()
+    Exrash.Interface.start()
   end
 
   def before_call_func({ method, url, header }) do
