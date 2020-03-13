@@ -1,31 +1,23 @@
 defmodule Exrash.ProviderTest do
-  use ExUnit.Case
 
-  test "fetch add worker" do
-    assert Exrash.Provider.fetch_add_worker_num(0, 5, nil) == { :ok, 5 }
+  use  ExUnit.Case
 
-    assert Exrash.Provider.fetch_add_worker_num(5, 5, 10) == { :ok, 5 }
-    assert Exrash.Provider.fetch_add_worker_num(4, 5, 10) == { :ok, 5 }
+  alias Exrash.Provider
+  alias Exrash.Master.MasterConfig
+  alias Exrash.Worker.WorkerConfig
 
-    assert Exrash.Provider.fetch_add_worker_num(9, 5, 10) == { :ok, 1 }
-    assert Exrash.Provider.fetch_add_worker_num(6, 5, 10) == { :ok, 4 }
-    assert Exrash.Provider.fetch_add_worker_num(6, 10, 10) == { :ok, 4 }
+  test "provider config" do
+    assert %Provider{} == Provider.new(%{})
 
-    assert Exrash.Provider.fetch_add_worker_num(10, 5, 10) == { :ok, 0 }
-    assert Exrash.Provider.fetch_add_worker_num(11, 5, 10) == { :ok, 0 }
-  end
+    assert %Provider{master_config: %MasterConfig{}} == Provider.new(%{master_config: %{}})
+    assert %Provider{master_config: %MasterConfig{http: "http://localhost", max_proc: 10}}
+      == Provider.new(%{master_config: %{http: "http://localhost", max_proc: 10}})
 
-  test "error fetch add worker" do
-    assert Exrash.Provider.fetch_add_worker_num("0", 5, 10) == { :error, "is not type" }
-    assert Exrash.Provider.fetch_add_worker_num(0, "5", 10) == { :error, "is not type" }
-    assert Exrash.Provider.fetch_add_worker_num(1, 5, "10") == { :error, "is not type" }
+    assert %Provider{worker_config: %WorkerConfig{}} == Provider.new(%{worker_config: %{}})
+    assert %Provider{worker_config: %WorkerConfig{sleep: 5, count: 10}}
+      == Provider.new(%{worker_config: %{sleep: 5, count: 10}})
 
-    assert Exrash.Provider.fetch_add_worker_num(1.1, 5.1, 10) == { :error, "is not type" }
-    assert Exrash.Provider.fetch_add_worker_num(0, 5.1, 10) == { :error, "is not type" }
-    assert Exrash.Provider.fetch_add_worker_num(0, 5, 10.1) == { :error, "is not type" }
-
-    assert Exrash.Provider.fetch_add_worker_num(-1, 5, 10) == { :error, "is not type" }
-    assert Exrash.Provider.fetch_add_worker_num(0, -5, 10) == { :error, "is not type" }
-    assert Exrash.Provider.fetch_add_worker_num(0, 5, -1) == { :error, "is not type" }
+    assert %Provider{worker_config: %WorkerConfig{sleep: 5, count: 10}, master_config: %MasterConfig{max_proc: 10}}
+      == Provider.new(%{worker_config: %{sleep: 5, count: 10}, master_config: %{max_proc: 10}})
   end
 end

@@ -60,7 +60,7 @@ defmodule Exrash.Worker do
   @spec running_scenario(list(%WorkerScenario{}), fun(), fun()) :: { :ok }
   def running_scenario([], _, _), do: { :ok }
   def running_scenario([scenario| tail], before_func, after_func) do
-    { scenario.method, scenario.url, scenario.header }
+    { scenario.method, scenario.url, scenario.headers }
     |> (&( call_before_func(before_func, &1) )).() # call back before function
     |> (&( call_before_func(scenario.before_call_func, &1) )).() # call back scenario before function
     |> call_request
@@ -76,15 +76,15 @@ defmodule Exrash.Worker do
   """
   @spec call_request({ HTTPoison.Request.method(), HTTPoison.Request.url() | %URI{}, HTTPoison.Request.headers()})
           :: { HTTPoison.Response.t() | nil, DateTime.t() | nil, DateTime.t() | nil }
-  def call_request({method, url, header}), do: call_request(method, url, header)
+  def call_request({method, url, headers}), do: call_request(method, url, headers)
 
   @spec call_request(HTTPoison.Request.method(), HTTPoison.Request.url() | %URI{}, HTTPoison.Request.headers() | nil)
           :: { HTTPoison.Response.t() | nil, DateTime.t() | nil, DateTime.t() | nil }
-  def call_request(:get, %URI{}=url, header), do: call_request(:get, to_string(url), header)
+  def call_request(:get, %URI{}=url, headers), do: call_request(:get, to_string(url), headers)
   def call_request(method, http, nil), do: call_request(method, http, [])
-  def call_request(:get, http, header) do
+  def call_request(:get, http, headers) do
     from = Timex.now
-    res = HttpClient.get!(http, header)
+    res = HttpClient.get!(http, headers)
     to = Timex.now
     {res, from, to}
   end

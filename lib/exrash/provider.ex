@@ -1,11 +1,8 @@
 defmodule Exrash.Provider do
 
-  if Mix.env == :test do
-    @compile :export_all
-    @compile :nowarn_export_all
-  end
-
   use GenServer
+
+  alias __MODULE__
   alias Exrash.Worker.WorkerConfig
   alias Exrash.Master.MasterConfig
 
@@ -18,6 +15,19 @@ defmodule Exrash.Provider do
   def init(state) do
     { :ok, %{ config: nil } }
   end
+
+  @spec new(map()) :: %Provider{}
+  def new(config) do
+    config
+    |> Map.merge(%{worker_config: new_worker_config(config)})
+    |> Map.merge(%{master_config: new_master_config(config)})
+    |> (&(Map.merge(%Provider{}, &1))).()
+  end
+
+  def new_worker_config(%{worker_config: config}), do: WorkerConfig.new(config)
+  def new_worker_config(_), do: WorkerConfig.new()
+  def new_master_config(%{master_config: config}), do: MasterConfig.new(config)
+  def new_master_config(_), do: MasterConfig.new()
 
   @doc """
   """
