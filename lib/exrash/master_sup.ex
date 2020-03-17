@@ -26,11 +26,21 @@ defmodule Exrash.MasterSup do
     Supervisor.init(children, strategy: :one_for_one)
   end
 
+  @doc """
+  """
   def start_http_request(config) do
     Exrash.MasterServer.start_http_request(config)
   end
 
+  @doc """
+  """
   def start_worker_process(master_config, worker_config) do
     Exrash.MasterServer.start_worker_process(master_config, worker_config)
+  end
+
+  @doc """
+  """
+  def stop_worker_process() do
+    Exrash.MasterServer.stop_worker_process()
   end
 end

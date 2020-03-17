@@ -30,7 +30,7 @@ defmodule Exrash.Supervisor do
       },
       %{
         id: Exrash.Report,
-        start: {Exrash.Report, :start_link, [Exrash.Exporter.IOExporter]},
+        start: {Exrash.Report, :start_link, []},
         restart: :temporary,
         shutdown: :brutal_kill,
         type: :worker

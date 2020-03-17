@@ -6,6 +6,7 @@ defmodule Exrash.MasterServer do
   end
 
   use GenServer
+  alias Exrash.WorkerSup
 
   def start_link() do
     GenServer.start_link(__MODULE__, [], name: __MODULE__)
@@ -57,11 +58,19 @@ defmodule Exrash.MasterServer do
         fn args -> args |> call_to_start_worker end,
         { master_config.add_proc, master_config.max_proc, worker_config }
       ])
-      { :noreply, { :ok, :start_http_request }, %{ state| master_config: master_config, worker_config: worker_config } }
+      { :noreply, %{ state| master_config: master_config, worker_config: worker_config } }
     else
       _ ->
-        { :noreply, { :error, :start_http_request }, state }
+        { :noreply, state }
     end
+  end
+
+  @doc """
+  """
+  def handle_cast({:stop_worker_process}, state) do
+    WorkerSup.fetch_workers()
+    |> stop_workers
+    { :noreply, state }
   end
 
   def terminate(reason, _state) do
@@ -88,6 +97,12 @@ defmodule Exrash.MasterServer do
   """
   def start_worker_process(master_config, worker_config) do
     GenServer.cast(__MODULE__, { :start_worker_process, master_config, worker_config })
+  end
+
+  @doc """
+  """
+  def stop_worker_process() do
+    GenServer.cast(__MODULE__, { :stop_worker_process })
   end
 
   @doc """
@@ -162,19 +177,19 @@ defmodule Exrash.MasterServer do
   def create_worker(count) when not is_integer(count), do: { :error, "not type count" }
   def create_worker(count) when count < 0, do: { :error, "don't create count" }
   def create_worker(count) do
-    res = for _ <- 1..count, do: Exrash.WorkerSup.create_worker
+    res = for _ <- 1..count, do: WorkerSup.create_worker
     { :ok, res }
   end
 
   @doc """
   call to http request for worker sup
   """
-  def call_to_worker(http), do: Exrash.WorkerSup.call_http_request(http)
+  def call_to_worker(http), do: WorkerSup.call_http_request(http)
 
   @doc """
   fetch current worker process number
   """
-  def fetch_worker_count(), do: Exrash.WorkerSup.fetch_worker_count
+  def fetch_worker_count(), do: WorkerSup.fetch_worker_count
 
   @doc """
   call request
@@ -189,10 +204,15 @@ defmodule Exrash.MasterServer do
   """
   def start_workers({:ok, workers}, config) do
     workers
-    |> Enum.map(&(Exrash.WorkerSup.start_worker(&1, config)))
+    |> Enum.map(&(WorkerSup.start_worker(&1, config)))
   end
   def start_workers(workers, config) do
     workers
-    |> Enum.map(&(Exrash.WorkerSup.start_worker(&1, config)))
+    |> Enum.map(&(WorkerSup.start_worker(&1, config)))
+  end
+
+  def stop_workers(workers) do
+    workers
+    |> Enum.map(&(WorkerSup.stop_worker(&1, :shutdown)))
   end
 end
