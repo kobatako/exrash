@@ -20,5 +20,6 @@ defmodule Exrash.Interface do
   end
 
   def stop() do
+    Exrash.Provider.stop_worker_process()
   end
 end

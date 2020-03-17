@@ -52,10 +52,21 @@ defmodule Exrash.WorkerSup do
     |> (fn %{workers: count} -> count end).()
   end
 
+  @doc """
+  fetch working process
+  """
+  def fetch_workers() do
+    Supervisor.which_children(__MODULE__)
+  end
+
+  @doc """
+  call to running
+  """
   def running_worker({:ok, pid}), do: Exrash.Worker.running_worker(pid)
   def running_worker({_, id, :worker, _}), do: Exrash.Worker.running_worker(id)
 
   @doc """
+  set worker config
   """
   def set_worker_config(config) do
     Supervisor.which_children(__MODULE__)
@@ -63,6 +74,7 @@ defmodule Exrash.WorkerSup do
   end
 
   @doc """
+  set worker config
   """
   def set_worker_config({_, pid, :worker, _}, config),do: Exrash.Worker.set_config(pid, config)
   def set_worker_config({:ok, pid}, config), do: Exrash.Worker.set_config(pid, config)
@@ -74,5 +86,12 @@ defmodule Exrash.WorkerSup do
   def start_worker(worker, config) do
     set_worker_config(worker, config)
     running_worker(worker)
+  end
+
+  @doc """
+  stop worker process
+  """
+  def stop_worker({_ref, id, :worker, _}, reason) do
+    GenServer.stop(id, reason)
   end
 end
