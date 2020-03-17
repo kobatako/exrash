@@ -22,15 +22,15 @@ defmodule Exrash.Supervisor do
         type: :worker
       },
       %{
-        id: Exrash.Exporter,
-        start: {Exrash.Exporter, :start_link, []},
+        id: Exrash.Exporter.IOExporter,
+        start: {Exrash.Exporter.IOExporter, :start_link, []},
         restart: :temporary,
         shutdown: :brutal_kill,
         type: :worker
       },
       %{
-        id: Exrash.ResultReport,
-        start: {Exrash.ResultReport, :start_link, []},
+        id: Exrash.Report,
+        start: {Exrash.Report, :start_link, [Exrash.Exporter.IOExporter]},
         restart: :temporary,
         shutdown: :brutal_kill,
         type: :worker
