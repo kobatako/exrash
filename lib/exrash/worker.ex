@@ -2,6 +2,7 @@ defmodule Exrash.Worker do
 
   use GenServer
   alias Exrash.HttpClient
+  alias Exrash.Report
   alias Exrash.Worker.WorkerConfig
   alias Exrash.Worker.WorkerScenario
 
@@ -32,7 +33,7 @@ defmodule Exrash.Worker do
   """
   def handle_cast({:request_http, %{"http" => http}}, state) do
     { res, from, to } = call_request(:get, http, [])
-    Exrash.ResultReport.add_report(res, from, to)
+    Exrash.Report.add_report(res, from, to)
     {:noreply, state}
   end
 
@@ -50,6 +51,9 @@ defmodule Exrash.Worker do
     { :noreply, %{ state| config: %{ config| count: config.count - 1 }}}
   end
 
+  @doc """
+  terminate worker
+  """
   def terminate(reson, state) do
     { :shutdown, "terminate worker process" }
   end
@@ -66,7 +70,7 @@ defmodule Exrash.Worker do
     |> call_request
     |> (&( call_after_func(scenario.after_call_func, &1) )).() # call back scenario after function
     |> (&( call_after_func(after_func, &1) )).() # call back before function
-    |> Exrash.ResultReport.add_report
+    |> Exrash.Report.add_record
 
     running_scenario(tail, before_func, after_func)
   end
