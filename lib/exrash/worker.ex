@@ -1,8 +1,8 @@
 defmodule Exrash.Worker do
 
   use GenServer
-  alias Exrash.HttpClient
   alias Exrash.Report
+  alias Exrash.Client.HttpClient
   alias Exrash.Worker.WorkerConfig
   alias Exrash.Worker.WorkerScenario
 
@@ -32,7 +32,7 @@ defmodule Exrash.Worker do
   call http request
   """
   def handle_cast({:request_http, %{"http" => http}}, state) do
-    { res, from, to } = call_request(:get, http, [])
+    { res, from, to } = Exrash.Request.HttpRequest.call_request(:get, http, [])
     Exrash.Report.add_report(res, from, to)
     {:noreply, state}
   end
@@ -67,7 +67,7 @@ defmodule Exrash.Worker do
     { scenario.method, scenario.url, scenario.headers }
     |> (&( call_before_func(before_func, &1) )).() # call back before function
     |> (&( call_before_func(scenario.before_call_func, &1) )).() # call back scenario before function
-    |> call_request
+    |> call_request(scenario)
     |> (&( call_after_func(scenario.after_call_func, &1) )).() # call back scenario after function
     |> (&( call_after_func(after_func, &1) )).() # call back before function
     |> Exrash.Report.add_record
@@ -78,21 +78,8 @@ defmodule Exrash.Worker do
   @doc """
   call request http client
   """
-  @spec call_request({ HTTPoison.Request.method(), HTTPoison.Request.url() | %URI{}, HTTPoison.Request.headers()})
-          :: { HTTPoison.Response.t() | nil, DateTime.t() | nil, DateTime.t() | nil }
-  def call_request({method, url, headers}), do: call_request(method, url, headers)
-
-  @spec call_request(HTTPoison.Request.method(), HTTPoison.Request.url() | %URI{}, HTTPoison.Request.headers() | nil)
-          :: { HTTPoison.Response.t() | nil, DateTime.t() | nil, DateTime.t() | nil }
-  def call_request(:get, %URI{}=url, headers), do: call_request(:get, to_string(url), headers)
-  def call_request(method, http, nil), do: call_request(method, http, [])
-  def call_request(:get, http, headers) do
-    from = Timex.now
-    res = HttpClient.get!(http, headers)
-    to = Timex.now
-    {res, from, to}
-  end
-  def call_request(_, _, _), do: {nil, nil, nil}
+  def call_request(args, %{call_request: nil}), do: { :error, nil, nil }
+  def call_request(args, %{call_request: call_request}), do: call_request.(args)
 
   @doc """
   call to scenario before function

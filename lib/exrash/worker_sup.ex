@@ -1,22 +1,23 @@
 defmodule Exrash.WorkerSup do
+  @moduledoc """
+  worker supervisor
+  """
 
   use Supervisor
-  alias Exrash.HttpClient
 
   def start_link() do
     Supervisor.start_link(__MODULE__, [], name: __MODULE__)
   end
 
   def init(__init__) do
-    HttpClient.start
     {:ok, { {:one_for_one, 6, 60}, []} }
   end
 
   @doc """
+  creat worker process
   """
-  def create_worker() do
-    Supervisor.start_child(__MODULE__, child_worker(make_ref()))
-  end
+  def create_worker(), do: Supervisor.start_child(__MODULE__, child_worker(make_ref()))
+
 
   @doc """
   child spec worker process
@@ -55,9 +56,7 @@ defmodule Exrash.WorkerSup do
   @doc """
   fetch working process
   """
-  def fetch_workers() do
-    Supervisor.which_children(__MODULE__)
-  end
+  def fetch_workers(), do: Supervisor.which_children(__MODULE__)
 
   @doc """
   call to running
@@ -91,7 +90,5 @@ defmodule Exrash.WorkerSup do
   @doc """
   stop worker process
   """
-  def stop_worker({_ref, id, :worker, _}, reason) do
-    GenServer.stop(id, reason)
-  end
+  def stop_worker({_ref, id, :worker, _}, reason), do: GenServer.stop(id, reason)
 end

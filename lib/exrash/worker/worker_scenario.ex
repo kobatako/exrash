@@ -6,6 +6,7 @@ defmodule Exrash.Worker.WorkerScenario do
             method: :get,
             body: nil,
             headers: [],
+            call_request: nil,
             before_call_func: nil,
             after_call_func: nil
 

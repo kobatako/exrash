@@ -1,4 +1,4 @@
-defmodule Exrash.HttpClient do
+defmodule Exrash.Client.HttpClient do
 
   use HTTPoison.Base
 
