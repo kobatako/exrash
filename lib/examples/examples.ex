@@ -1,6 +1,7 @@
 defmodule Exrash.Examples do
 
   alias __MODULE__
+  alias Exrash.Request.HttpRequest
 
   def sample_call() do
     Exrash.start
@@ -25,15 +26,18 @@ defmodule Exrash.Examples do
           scenarios: [
             %{
               url: "http://192.168.33.142/index.html",
-              method: :get
+              method: :get,
+              call_request: (&(call_request(&1)))
             },
             %{
               url: "http://192.168.33.142/hello.html",
-              method: :get
+              method: :get,
+              call_request: (&(call_request(&1)))
             },
             %{
               url: URI.parse("http://192.168.33.142/sample.html"),
-              method: :get
+              method: :get,
+              call_request: (&(call_request(&1)))
             }
           ]
         },
@@ -44,6 +48,10 @@ defmodule Exrash.Examples do
       }
     )
     Exrash.Interface.start()
+  end
+
+  def call_request(args) do
+    HttpRequest.call_request(args)
   end
 
   def before_call_func({ method, url, header }) do

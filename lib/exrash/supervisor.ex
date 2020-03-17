@@ -1,11 +1,17 @@
 defmodule Exrash.Supervisor do
+  @moduledoc """
+  exrash supervisor
+  """
+
   use Supervisor
+  alias Exrash.Client.HttpClient
 
   def start_link() do
     Supervisor.start_link(__MODULE__, [], name: __MODULE__)
   end
 
   def init(__init__) do
+    HttpClient.start
     children = [
       %{
         id: Exrash.MasterSup,
